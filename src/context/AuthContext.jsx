@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { login as apiLogin, getProfile, logout as apiLogout } from '../api/auth';
+import { login as apiLogin, getProfile, logout as apiLogout, socialLoginGoogle } from '../api/auth';
 
 const AuthContext = createContext();
 
@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const data = await getProfile();
-        // Assuming data is now the user object directly based on api/auth.js change
         setUser(data);
       } catch (err) {
         localStorage.removeItem('jara_token');
@@ -32,12 +31,27 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const data = await apiLogin(credentials);
-      // Assuming data contains token and user properties
       localStorage.setItem('jara_token', data.token);
       setUser(data.user);
       return data.user;
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const socialLogin = async (googleData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await socialLoginGoogle(googleData);
+      localStorage.setItem('jara_token', data.token);
+      setUser(data.user);
+      return data.user;
+    } catch (err) {
+      setError(err.response?.data?.message || 'Social login failed');
       throw err;
     } finally {
       setLoading(false);
@@ -56,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, error, login, logout, checkAuth, socialLogin }}>
       {children}
     </AuthContext.Provider>
   );

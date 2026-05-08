@@ -10,11 +10,13 @@ const Marketplace = () => {
   const [products, setProducts] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setError(null);
         const [prodData, vendData] = await Promise.all([
           getProducts(),
           getVendors()
@@ -24,6 +26,7 @@ const Marketplace = () => {
         setVendors(vendData.data || []);
       } catch (err) {
         console.error('Error fetching marketplace data:', err);
+        setError('Failed to load marketplace data. Please check your connection and try again.');
       } finally {
         setLoading(false);
       }
@@ -74,6 +77,18 @@ const Marketplace = () => {
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
           <Loader2 className="animate-spin" size={40} color="var(--primary)" />
+        </div>
+      ) : error ? (
+        <div style={{ textAlign: 'center', padding: '100px 0', color: 'red' }}>
+          <h3 style={{ marginBottom: '16px' }}>Oops! Something went wrong.</h3>
+          <p>{error}</p>
+          <button 
+            className="btn-primary" 
+            style={{ marginTop: '24px' }}
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '80px' }}>
