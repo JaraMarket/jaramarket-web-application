@@ -1,53 +1,38 @@
 import React, { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Loader2 } from 'lucide-react';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { useAuth } from '../context/AuthContext';
 
 /**
  * GoogleSignInButton
  *
  * Props:
  * - role: 'customer' | 'vendor' (defaults to 'customer')
- * - onSuccess: function(userData) — called after successful login, receives user + token
+ * - onSuccess: function(userData) — called after successful login, receives user object
  * - onError: function(errorMessage) — called if login fails
  */
 const GoogleSignInButton = ({ role = 'customer', onSuccess, onError }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { socialLogin } = useAuth();
 
   const handleGoogleSuccess = async (tokenResponse) => {
     setIsLoading(true);
     try {
       // tokenResponse.access_token is the Google Access Token
-      const response = await fetch(`${API_BASE_URL}/social/google`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          token: tokenResponse.access_token,
-          role: role,
-        }),
+      // We pass this to our AuthContext which handles the API call and state
+      const userData = await socialLogin({
+        access_token: tokenResponse.access_token,
+        role: role,
+        // email is usually extracted from the token on the backend, 
+        // but can be added here if needed by fetching from Google's userinfo.
       });
 
-      const data = await response.json();
-
-      if (!response.ok || !data.status) {
-        throw new Error(data.message || 'Google sign-in failed. Please try again.');
-      }
-
-      // Save the Sanctum bearer token to localStorage
-      // Note: Standardizing on 'jara_token' to match existing AuthContext logic
-      localStorage.setItem('jara_token', data.data.token);
-      localStorage.setItem('user', JSON.stringify(data.data));
-
-      // Notify parent component of success
-      if (onSuccess) onSuccess(data.data);
+      if (onSuccess) onSuccess(userData);
 
     } catch (error) {
       console.error('Google Sign-In Error:', error);
-      if (onError) onError(error.message);
+      const errorMsg = error.response?.data?.message || 'Google sign-in failed. Please try again.';
+      if (onError) onError(errorMsg);
     } finally {
       setIsLoading(false);
     }

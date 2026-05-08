@@ -16,10 +16,13 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('jara_token');
     if (token) {
       try {
-        const data = await getProfile();
-        setUser(data);
+        const response = await getProfile();
+        // Standardize: backend returns user in response.data or response.data.data
+        const userData = response.data.user || response.data;
+        setUser(userData);
       } catch (err) {
         localStorage.removeItem('jara_token');
+        localStorage.removeItem('user');
         setUser(null);
       }
     }
@@ -30,10 +33,13 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiLogin(credentials);
-      localStorage.setItem('jara_token', data.token);
-      setUser(data.user);
-      return data.user;
+      const response = await apiLogin(credentials);
+      // Backend returns { status, data: { token, user: { ... } } }
+      const { token, user } = response.data;
+      localStorage.setItem('jara_token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      return user;
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
       throw err;
@@ -46,11 +52,15 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await socialLoginGoogle(googleData);
-      localStorage.setItem('jara_token', data.token);
-      setUser(data.user);
-      return data.user;
+      const response = await socialLoginGoogle(googleData);
+      // Backend returns { status, data: { token, user: { ... } } }
+      const { token, user } = response.data;
+      localStorage.setItem('jara_token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      return user;
     } catch (err) {
+      console.error('Social login error in Context:', err);
       setError(err.response?.data?.message || 'Social login failed');
       throw err;
     } finally {
@@ -65,6 +75,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', err);
     } finally {
       localStorage.removeItem('jara_token');
+      localStorage.removeItem('user');
       setUser(null);
     }
   };
