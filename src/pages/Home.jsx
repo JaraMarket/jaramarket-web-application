@@ -112,12 +112,27 @@ const Home = () => {
                 or a customer looking for the best deals, the experience is always smooth, 
                 fast, and beautiful.
               </p>
-              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
                 <CheckItem text="Real-time order tracking" />
                 <CheckItem text="Instant vendor-customer chat" />
                 <CheckItem text="Secure one-click payments" />
                 <CheckItem text="Personalized recommendations" />
               </ul>
+
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                <AppStoreButton 
+                  store="apple" 
+                  url="#" 
+                  title="App Store" 
+                  subtitle="Download on the"
+                />
+                <AppStoreButton 
+                  store="google" 
+                  url="#" 
+                  title="Google Play" 
+                  subtitle="GET IT ON"
+                />
+              </div>
             </div>
             <div className="glass" style={{ 
               height: '500px', 
@@ -139,6 +154,46 @@ const Home = () => {
     </div>
   );
 };
+
+const AppStoreButton = ({ store, url, title, subtitle }) => (
+  <a href={url} className="glass" style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '10px 20px',
+    borderRadius: '12px',
+    background: '#000',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,0.1)',
+    minWidth: '170px',
+    transition: 'transform 0.2s ease',
+  }}
+  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+  >
+    {store === 'apple' ? (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.05,20.28c-0.96,1.39-1.96,2.77-3.48,2.79c-1.49,0.02-1.97-0.89-3.68-0.89c-1.71,0-2.24,0.87-3.66,0.92 c-1.47,0.05-2.61-1.51-3.58-2.9c-1.98-2.85-3.49-8.05-1.46-11.58c1.01-1.75,2.81-2.86,4.78-2.89c1.5-0.02,2.91,1.01,3.83,1.01 c0.92,0,2.65-1.24,4.45-1.05c0.75,0.03,2.86,0.3,4.22,2.3c-0.11,0.07-2.52,1.47-2.5,4.39c0.02,3.48,3.03,4.64,3.07,4.66 C19.01,17.06,18.01,18.89,17.05,20.28z M12.04,5.19c-0.03-2.5,2.06-4.63,4.52-4.69c0.23,2.78-2.57,4.99-4.52,4.69V5.19z" />
+      </svg>
+    ) : (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 20.5v-17c0-.83.67-1.5 1.5-1.5h.39c.28 0 .54.11.73.3l12.8 12.8c.39.39.39 1.02 0 1.41L5.62 22.2c-.19.19-.45.3-.73.3h-.39c-.83 0-1.5-.67-1.5-1.5z" opacity=".3"/>
+        <path d="M17.5 12L4.5 21V3l13 9z" fill="#fff"/>
+        <path d="M17.5 12L4.5 21V3l13 9z" fill="url(#google-play-gradient)"/>
+        <defs>
+          <linearGradient id="google-play-gradient" x1="4.5" y1="3" x2="17.5" y2="21" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#00f0ff"/>
+            <stop offset="1" stopColor="#00ff94"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    )}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: '1.2' }}>
+      <span style={{ fontSize: '10px', textTransform: 'uppercase', opacity: 0.8 }}>{subtitle}</span>
+      <span style={{ fontSize: '18px', fontWeight: '700' }}>{title}</span>
+    </div>
+  </a>
+);
 
 const StatItem = ({ value, label }) => (
   <div style={{ textAlign: 'center' }}>
