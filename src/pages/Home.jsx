@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Store, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
 import SEO from '../components/SEO';

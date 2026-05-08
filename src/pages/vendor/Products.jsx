@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getVendorProducts, deleteProduct } from '../../api/vendor';
-import { Plus, Search, Edit2, Trash2, Loader2, MoreVertical } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Loader2 } from 'lucide-react';
 
 const VendorProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
 
   const fetchProducts = async () => {
     try {
@@ -22,12 +18,17 @@ const VendorProducts = () => {
     }
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProducts();
+  }, []);
+
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await deleteProduct(id);
         setProducts(products.filter(p => p.id !== id));
-      } catch (err) {
+      } catch {
         alert('Failed to delete product');
       }
     }

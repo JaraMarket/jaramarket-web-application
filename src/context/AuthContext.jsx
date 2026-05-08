@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { login as apiLogin, getProfile, logout as apiLogout } from '../api/auth';
 
 const AuthContext = createContext();
@@ -8,18 +8,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = async () => {
     const token = localStorage.getItem('jara_token');
     if (token) {
       try {
         const data = await getProfile();
-        // Assuming data is now the user object directly based on api/auth.js change
         setUser(data);
-      } catch (err) {
+      } catch {
         localStorage.removeItem('jara_token');
         setUser(null);
       }
@@ -27,12 +22,16 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    checkAuth();
+  }, []);
+
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
     try {
       const data = await apiLogin(credentials);
-      // Assuming data contains token and user properties
       localStorage.setItem('jara_token', data.token);
       setUser(data.user);
       return data.user;
@@ -62,4 +61,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

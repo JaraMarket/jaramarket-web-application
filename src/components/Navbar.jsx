@@ -1,8 +1,7 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, LogOut, LayoutDashboard } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();

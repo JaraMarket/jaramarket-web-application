@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getVendorEarnings, getVendorPayouts, requestPayout } from '../../api/vendor';
 import { Wallet, ArrowUpCircle, History, Landmark, Loader2, Info } from 'lucide-react';
 
@@ -8,10 +8,6 @@ const VendorWallet = () => {
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState('');
   const [requesting, setRequesting] = useState(false);
-
-  useEffect(() => {
-    fetchWalletData();
-  }, []);
 
   const fetchWalletData = async () => {
     try {
@@ -28,6 +24,11 @@ const VendorWallet = () => {
     }
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchWalletData();
+  }, []);
+
   const handlePayoutRequest = async (e) => {
     e.preventDefault();
     if (parseFloat(amount) > balance) {
@@ -40,7 +41,7 @@ const VendorWallet = () => {
       alert('Payout request submitted successfully');
       setAmount('');
       fetchWalletData();
-    } catch (err) {
+    } catch {
       alert('Failed to submit payout request');
     } finally {
       setRequesting(false);
