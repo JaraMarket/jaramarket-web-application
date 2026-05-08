@@ -16,6 +16,8 @@ import VendorDashboard from './pages/vendor/Dashboard';
 import VendorProducts from './pages/vendor/Products';
 import VendorOrders from './pages/vendor/Orders';
 import VendorWallet from './pages/vendor/Wallet';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import PrivateRoute from './components/PrivateRoute';
 
 function AppContent() {
@@ -34,6 +36,8 @@ function AppContent() {
             <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
             <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
             <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+            <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+            <Route path="/terms" element={<PageTransition><TermsOfService /></PageTransition>} />
             <Route 
               path="/vendor/dashboard" 
               element={
