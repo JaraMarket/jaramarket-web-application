@@ -1,22 +1,33 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShoppingBag, Store, ShieldCheck, Zap, ArrowRight,
-  Leaf, Truck, Wallet, ChefHat, Heart, Globe
+  Leaf, Truck, Wallet, ChefHat, Heart, Globe, Loader2
 } from 'lucide-react';
 import SEO from '../components/SEO';
+import { getCategories } from '../api/categories';
 
-const CATEGORIES = [
-  { emoji: '🌍', name: 'Continental Foods' },
-  { emoji: '🍲', name: 'Tribal Foods' },
-  { emoji: '🌾', name: 'Grain Meals' },
-  { emoji: '🥔', name: 'Tuber Meals' },
-  { emoji: '🍜', name: 'Soups & Sauces' },
-  { emoji: '🦐', name: 'Seafood' },
-  { emoji: '🍟', name: 'Fries & Snacks' },
-  { emoji: '🥗', name: 'Healthy / Keto' },
-];
+const BASE_URL = 'https://jara-market-laravel-backend-production.up.railway.app';
+
 
 const Home = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCategories();
+        setCategories(response.data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   return (
     <div className="animate-fade">
       <SEO
@@ -186,9 +197,19 @@ const Home = () => {
             gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
             gap: '24px'
           }}>
-            {CATEGORIES.map((cat) => (
-              <CategoryCard key={cat.name} emoji={cat.emoji} name={cat.name} />
-            ))}
+            {loading ? (
+              <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+                <Loader2 className="animate-spin" size={40} color="var(--primary)" />
+              </div>
+            ) : (
+              categories.map((cat) => (
+                <CategoryCard 
+                  key={cat.id} 
+                  name={cat.name} 
+                  image={cat.image ? `${BASE_URL}/storage/${cat.image}` : null} 
+                />
+              ))
+            )}
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '48px' }}>
@@ -314,7 +335,7 @@ const Home = () => {
 
 /* ── Sub-components ── */
 
-const CategoryCard = ({ emoji, name }) => (
+const CategoryCard = ({ emoji, name, image }) => (
   <div
     className="card glass"
     style={{
@@ -332,7 +353,23 @@ const CategoryCard = ({ emoji, name }) => (
       e.currentTarget.style.boxShadow = '';
     }}
   >
-    <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{emoji}</span>
+    {image ? (
+      <img 
+        src={image} 
+        alt={name} 
+        style={{ 
+          width: '60px', 
+          height: '60px', 
+          borderRadius: '50%', 
+          objectFit: 'cover', 
+          marginBottom: '12px',
+          margin: '0 auto 12px',
+          display: 'block'
+        }} 
+      />
+    ) : (
+      <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>{emoji || '📦'}</span>
+    )}
     <p style={{ fontWeight: '600', fontSize: '14px' }}>{name}</p>
   </div>
 );

@@ -41,7 +41,7 @@ const Footer = () => {
           <div>
             <h4 style={{ marginBottom: '20px' }}>Support</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <li><Link to="/" style={{ color: 'var(--text-secondary)' }}>Help Center</Link></li>
+              <li><Link to="/contact" style={{ color: 'var(--text-secondary)' }}>Contact Us</Link></li>
               <li><Link to="/privacy" style={{ color: 'var(--text-secondary)' }}>Privacy Policy</Link></li>
               <li><Link to="/terms" style={{ color: 'var(--text-secondary)' }}>Terms of Service</Link></li>
             </ul>
