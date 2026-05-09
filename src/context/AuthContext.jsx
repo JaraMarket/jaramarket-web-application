@@ -17,8 +17,8 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const response = await getProfile();
-        // Standardize: backend returns user in response.data or response.data.data
-        const userData = response.data.user || response.data;
+        // Backend returns { status, message, data: { ...user_fields } }
+        const userData = response.data.data || response.data;
         setUser(userData);
       } catch (err) {
         localStorage.removeItem('jara_token');
@@ -34,12 +34,13 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await apiLogin(credentials);
-      // Backend returns { status, data: { token, user: { ... } } }
-      const { token, user } = response.data;
+      // Backend returns { status, message, data: { ..., token } }
+      const { token, ...userData } = response.data.data;
+      
       localStorage.setItem('jara_token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-      return user;
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      return userData;
     } catch (err) {
       console.error('Login error:', err);
       if (err.response) {
@@ -64,12 +65,13 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await socialLoginGoogle(googleData);
-      // Backend returns { status, data: { token, user: { ... } } }
-      const { token, user } = response.data;
+      // Backend returns { status, message, data: { ..., token } }
+      const { token, ...userData } = response.data.data;
+      
       localStorage.setItem('jara_token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-      return user;
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      return userData;
     } catch (err) {
       console.error('Social login error in Context:', err);
       if (err.response) {
