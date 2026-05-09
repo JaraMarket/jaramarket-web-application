@@ -34,10 +34,8 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await apiLogin(credentials);
-      console.log('Login API Raw Response:', response);
       // 'response' is already the JSON { status, message, data } from auth.js
       const { token, ...userData } = response.data;
-      console.log('Extracted UserData:', userData);
       
       localStorage.setItem('jara_token', token);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -67,10 +65,8 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await socialLoginGoogle(googleData);
-      console.log('Social Login API Raw Response:', response);
       // 'response' is already the JSON { status, message, data } from auth.js
       const { token, ...userData } = response.data;
-      console.log('Extracted Social UserData:', userData);
       
       localStorage.setItem('jara_token', token);
       localStorage.setItem('user', JSON.stringify(userData));

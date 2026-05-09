@@ -17,7 +17,6 @@ const GoogleSignInButton = ({ role = 'customer', onSuccess, onError }) => {
 
   const handleGoogleSuccess = async (tokenResponse) => {
     setIsLoading(true);
-    console.log('Google Token Received:', tokenResponse);
     try {
       // FIX: The backend specifically expects the key 'token'
       // not 'access_token'.
@@ -25,7 +24,6 @@ const GoogleSignInButton = ({ role = 'customer', onSuccess, onError }) => {
         token: tokenResponse.access_token, 
         role: role
       });
-      console.log('Social Login Success, UserData:', userData);
 
       if (onSuccess) onSuccess(userData);
 
