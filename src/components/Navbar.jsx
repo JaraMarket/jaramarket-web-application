@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, LogOut, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -38,12 +38,10 @@ const Navbar = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
           <Link to="/marketplace" style={{ fontWeight: '500', color: 'var(--text-secondary)' }}>Marketplace</Link>
-          <Link to="/marketplace" style={{ fontWeight: '500', color: 'var(--text-secondary)' }}>Vendors</Link>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '16px' }}>
             <Link to="/cart" style={{ position: 'relative', color: 'var(--text-primary)' }}>
               <ShoppingCart size={22} />
-              {/* Badge placeholder */}
               <span style={{ 
                 position: 'absolute', 
                 top: '-8px', 
@@ -58,21 +56,14 @@ const Navbar = () => {
             </Link>
 
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                {user.role === 'vendor' && (
-                  <Link to="/vendor/dashboard" className="btn-primary" style={{ padding: '8px 16px', fontSize: '14px' }}>
-                    <LayoutDashboard size={18} /> Dashboard
-                  </Link>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderLeft: '1px solid var(--card-border)', paddingLeft: '16px' }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '14px', fontWeight: '600' }}>{user.name}</p>
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{user.role}</p>
-                  </div>
-                  <button onClick={handleLogout} style={{ color: 'var(--text-secondary)', background: 'none' }}>
-                    <LogOut size={20} />
-                  </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderLeft: '1px solid var(--card-border)', paddingLeft: '16px' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: '14px', fontWeight: '600' }}>{user.name}</p>
+                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{user.role}</p>
                 </div>
+                <button onClick={handleLogout} style={{ color: 'var(--text-secondary)', background: 'none' }}>
+                  <LogOut size={20} />
+                </button>
               </div>
             ) : (
               <Link to="/login" className="btn-primary">
