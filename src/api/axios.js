@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'https://jara-market-laravel-backend-production.up.railway.app/api';
+// Restoring the proven working Base URL for the JaraMarket production server
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'https://jara-market-laravel-backend-production.up.railway.app/api/jaram';
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -29,9 +30,11 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear token and redirect to login if unauthorized
       localStorage.removeItem('jara_token');
-      // Optional: window.location.href = '/login';
+      localStorage.removeItem('user');
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

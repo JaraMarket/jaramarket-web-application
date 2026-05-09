@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { login as apiLogin, getProfile, logout as apiLogout } from '../api/auth';
+import { login as apiLogin, getProfile, logout as apiLogout, socialLoginGoogle } from '../api/auth';
 
 const AuthContext = createContext();
 
@@ -16,11 +16,13 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('jara_token');
     if (token) {
       try {
-        const data = await getProfile();
-        // Assuming data is now the user object directly based on api/auth.js change
-        setUser(data);
+        const response = await getProfile();
+        // Standardize: backend returns user in response.data or response.data.data
+        const userData = response.data.user || response.data;
+        setUser(userData);
       } catch (err) {
         localStorage.removeItem('jara_token');
+        localStorage.removeItem('user');
         setUser(null);
       }
     }
@@ -31,13 +33,35 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiLogin(credentials);
-      // Assuming data contains token and user properties
-      localStorage.setItem('jara_token', data.token);
-      setUser(data.user);
-      return data.user;
+      const response = await apiLogin(credentials);
+      // Backend returns { status, data: { token, user: { ... } } }
+      const { token, user } = response.data;
+      localStorage.setItem('jara_token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      return user;
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const socialLogin = async (googleData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await socialLoginGoogle(googleData);
+      // Backend returns { status, data: { token, user: { ... } } }
+      const { token, user } = response.data;
+      localStorage.setItem('jara_token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      return user;
+    } catch (err) {
+      console.error('Social login error in Context:', err);
+      setError(err.response?.data?.message || 'Social login failed');
       throw err;
     } finally {
       setLoading(false);
@@ -51,12 +75,13 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', err);
     } finally {
       localStorage.removeItem('jara_token');
+      localStorage.removeItem('user');
       setUser(null);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, error, login, logout, checkAuth, socialLogin }}>
       {children}
     </AuthContext.Provider>
   );
