@@ -1,5 +1,10 @@
 import axiosInstance from './axios';
 
+/**
+ * Orders & Payments API Service
+ * Reconciled with Postman Collection V2
+ */
+
 export const placeOrder = async (orderData) => {
   const response = await axiosInstance.post('/api/orders', orderData);
   return response.data;

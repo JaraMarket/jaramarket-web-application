@@ -1,5 +1,10 @@
 import axiosInstance from './axios';
 
+/**
+ * Vendor Management API Service
+ * Reconciled with Postman Collection V2
+ */
+
 export const getVendorProfile = async () => {
   const response = await axiosInstance.get('/api/vendor/profile');
   return response.data;

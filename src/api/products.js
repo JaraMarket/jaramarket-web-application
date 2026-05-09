@@ -1,5 +1,10 @@
 import axiosInstance from './axios';
 
+/**
+ * Products API Service
+ * Reconciled with Postman Collection V2
+ */
+
 export const getProducts = async () => {
   const response = await axiosInstance.get('/api/products');
   return response.data;

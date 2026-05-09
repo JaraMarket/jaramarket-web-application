@@ -77,6 +77,7 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
     try {
       await apiRegister(formData);
       setIsOtpSent(true);
@@ -84,7 +85,26 @@ const Register = () => {
       setCanResend(false);
       setSuccess('Account created! Verification code sent to your email.');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      if (err.response) {
+        const message = err.response.data.message;
+        const errors = err.response.data.errors;
+        
+        if (message === 'All transports failed.') {
+          setError('We created your account, but could not send the verification email. Please try "Resend Code" in a moment or contact support.');
+          setIsOtpSent(true); // Still move to OTP screen so they can try resending
+        } else if (errors) {
+          // Display the first validation error found
+          const firstError = Object.values(errors)[0][0];
+          setError(firstError);
+        } else {
+          setError(message || 'Registration failed. Please try again.');
+        }
+      } else if (err.request) {
+        setError('No response from server. Please check your internet connection.');
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -100,6 +120,7 @@ const Register = () => {
 
     setIsVerifying(true);
     setError(null);
+    setSuccess(null);
     try {
       await validateOtp({ email: formData.email, otp: otpValue });
       setSuccess('Email verified successfully! Welcome to JaraMarket.');
@@ -116,6 +137,7 @@ const Register = () => {
 
     setIsResending(true);
     setError(null);
+    setSuccess(null);
     try {
       await resendOtp(formData.email);
       setSuccess('A fresh verification code has been sent.');
@@ -124,7 +146,11 @@ const Register = () => {
       setOtp(['', '', '', '', '', '']);
       otpInputs.current[0].focus();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to resend code. Please try again.');
+      if (err.response?.data?.message === 'All transports failed.') {
+        setError('Still unable to send email. Please check if your email address is correct or try again later.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to resend code. Please try again.');
+      }
     } finally {
       setIsResending(false);
     }

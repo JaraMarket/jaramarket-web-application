@@ -41,7 +41,18 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       return user;
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
+      if (err.response) {
+        if (err.response.status === 401) {
+          setError('Invalid email or password. Please try again.');
+        } else {
+          setError(err.response.data.message || 'Login failed. Please try again.');
+        }
+      } else if (err.request) {
+        setError('No response from server. Please check your internet connection.');
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
       throw err;
     } finally {
       setLoading(false);
@@ -61,7 +72,13 @@ export const AuthProvider = ({ children }) => {
       return user;
     } catch (err) {
       console.error('Social login error in Context:', err);
-      setError(err.response?.data?.message || 'Social login failed');
+      if (err.response) {
+        setError(err.response.data.message || 'Social login failed. Please try again.');
+      } else if (err.request) {
+        setError('No response from server. Please check your internet connection.');
+      } else {
+        setError('Social login failed. Please try again.');
+      }
       throw err;
     } finally {
       setLoading(false);

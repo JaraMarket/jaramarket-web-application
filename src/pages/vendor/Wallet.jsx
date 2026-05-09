@@ -1,26 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { getVendorEarnings, getVendorPayouts, requestPayout } from '../../api/vendor';
-import { Wallet, ArrowUpCircle, History, Landmark, Loader2, Info } from 'lucide-react';
+import { getBanks } from '../../api/orders';
+import { Wallet, ArrowUpCircle, History, Landmark, Loader2, Info, ChevronDown } from 'lucide-react';
+import { useNotification } from '../../components/Notification';
 
 const VendorWallet = () => {
   const [balance, setBalance] = useState(0);
   const [payouts, setPayouts] = useState([]);
+  const [banks, setBanks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState('');
+  const [selectedBankId, setSelectedBankId] = useState('');
   const [requesting, setRequesting] = useState(false);
+  const { addNotification } = useNotification();
 
   useEffect(() => {
-    fetchWalletData();
+    fetchData();
   }, []);
 
-  const fetchWalletData = async () => {
+  const fetchData = async () => {
     try {
-      const [earningsData, payoutsData] = await Promise.all([
+      const [earningsData, payoutsData, banksData] = await Promise.all([
         getVendorEarnings(),
-        getVendorPayouts()
+        getVendorPayouts(),
+        getBanks()
       ]);
       setBalance(earningsData.data?.total_earnings || 0);
       setPayouts(payoutsData.data || []);
+      setBanks(banksData.data || []);
+      if (banksData.data?.length > 0) {
+        setSelectedBankId(banksData.data[0].id);
+      }
     } catch (err) {
       console.error('Error fetching wallet data:', err);
     } finally {
@@ -31,17 +41,21 @@ const VendorWallet = () => {
   const handlePayoutRequest = async (e) => {
     e.preventDefault();
     if (parseFloat(amount) > balance) {
-      alert('Insufficient balance');
+      addNotification('Insufficient balance', 'error');
       return;
     }
     setRequesting(true);
     try {
-      await requestPayout({ amount: parseFloat(amount), bank_id: 1, remark: 'Vendor payout' });
-      alert('Payout request submitted successfully');
+      await requestPayout({ 
+        amount: parseFloat(amount), 
+        bank_id: selectedBankId, 
+        remark: 'Vendor payout' 
+      });
+      addNotification('Payout request submitted successfully', 'success');
       setAmount('');
-      fetchWalletData();
+      fetchData();
     } catch (err) {
-      alert('Failed to submit payout request');
+      addNotification('Failed to submit payout request', 'error');
     } finally {
       setRequesting(false);
     }
@@ -80,43 +94,62 @@ const VendorWallet = () => {
             
             <form onSubmit={handlePayoutRequest}>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Amount to Withdraw</label>
+                <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Amount to Withdraw (₦)</label>
+                <input 
+                  type="number" 
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--card-border)',
+                    background: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Destination Bank Account</label>
                 <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontWeight: '700' }}>₦</span>
-                  <input 
-                    type="number" 
-                    placeholder="0.00"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                  <select 
+                    value={selectedBankId}
+                    onChange={(e) => setSelectedBankId(e.target.value)}
                     required
                     style={{
                       width: '100%',
-                      padding: '14px 14px 14px 36px',
+                      padding: '14px 40px 14px 48px',
                       borderRadius: '12px',
                       border: '1px solid var(--card-border)',
                       background: 'var(--bg-secondary)',
                       color: 'var(--text-primary)',
-                      fontSize: '18px',
-                      fontWeight: '700',
-                      outline: 'none'
+                      fontSize: '15px',
+                      outline: 'none',
+                      appearance: 'none'
                     }}
-                  />
+                  >
+                    {banks.map(bank => (
+                      <option key={bank.id} value={bank.id}>
+                        {bank.bank_name} • {bank.account_number}
+                      </option>
+                    ))}
+                    {banks.length === 0 && <option value="">No banks linked</option>}
+                  </select>
+                  <Landmark size={20} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                  <ChevronDown size={20} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', pointerEvents: 'none' }} />
                 </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '12px', marginBottom: '24px' }}>
-                <Landmark size={20} color="var(--text-secondary)" />
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '600' }}>Bank Account</p>
-                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>GT Bank • **** 1234</p>
-                </div>
-                <button type="button" style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: '600', background: 'none' }}>Change</button>
               </div>
 
               <button 
                 type="submit" 
                 className="btn-primary" 
-                disabled={requesting || !amount || parseFloat(amount) <= 0}
+                disabled={requesting || !amount || parseFloat(amount) <= 0 || !selectedBankId}
                 style={{ width: '100%', justifyContent: 'center', padding: '16px' }}
               >
                 {requesting ? <Loader2 className="animate-spin" /> : 'Withdraw Funds'}
