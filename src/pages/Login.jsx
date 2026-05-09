@@ -3,12 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../components/Notification';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import SEO from '../components/SEO';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, error, loading } = useAuth();
+  const { login, checkAuth, error, loading } = useAuth();
   const { addNotification } = useNotification();
   const navigate = useNavigate();
 
@@ -16,14 +17,24 @@ const Login = () => {
     e.preventDefault();
     try {
       const user = await login({ email, password });
-      addNotification(`Welcome back, ${user.name}!`, 'success');
-      if (user.role === 'vendor') {
-        navigate('/vendor/dashboard');
-      } else {
-        navigate('/');
-      }
+      handleLoginSuccess(user);
     } catch (err) {
       console.error('Login error:', err);
+    }
+  };
+
+  const handleGoogleSuccess = (userData) => {
+    // AuthContext uses checkAuth to sync state from localStorage
+    checkAuth();
+    handleLoginSuccess(userData);
+  };
+
+  const handleLoginSuccess = (user) => {
+    addNotification(`Welcome back, ${user.firstname || user.name}!`, 'success');
+    if (user.role === 'vendor') {
+      navigate('/vendor/dashboard');
+    } else {
+      navigate('/');
     }
   };
 
@@ -116,6 +127,17 @@ const Login = () => {
             )}
           </button>
         </form>
+
+        <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ flex: 1, height: '1px', background: 'var(--card-border)' }}></div>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>or continue with</span>
+          <div style={{ flex: 1, height: '1px', background: 'var(--card-border)' }}></div>
+        </div>
+
+        <GoogleSignInButton 
+          onSuccess={handleGoogleSuccess} 
+          onError={(msg) => addNotification(msg, 'error')}
+        />
 
         <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px' }}>
           <p style={{ color: 'var(--text-secondary)' }}>

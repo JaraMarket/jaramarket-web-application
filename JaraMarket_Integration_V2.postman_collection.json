@@ -1,0 +1,237 @@
+{
+  "info": {
+    "name": "JaraMarket Neural Bridge (Customer & Vendor)",
+    "description": "The definitive API collection for JaraMarket. Designed for React/Vite frontends. Includes comprehensive coverage of Customer and Vendor endpoints, organized by feature set. All endpoints point to the live Railway production environment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL", "value": "https://jara-market-laravel-backend-production.up.railway.app", "type": "string" },
+    { "key": "AUTH_TOKEN", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth & Onboarding",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n  \"email\": \"test_user@example.com\",\n  \"password\": \"Password123!\",\n  \"password_confirmation\": \"Password123!\",\n  \"role\": \"customer\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/api/auth/register", "host": ["{{BASE_URL}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test_user@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/api/auth/login", "host": ["{{BASE_URL}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Validate OTP (Register)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test_user@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/jaram/validate-otp", "host": ["{{BASE_URL}}"], "path": ["jaram", "validate-otp"] }
+          }
+        },
+        {
+          "name": "Social Auth - Google",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"GOOGLE_ACCESS_TOKEN\",\n  \"email\": \"user@gmail.com\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/jaram/social/google", "host": ["{{BASE_URL}}"], "path": ["jaram", "social", "google"] }
+          }
+        },
+        {
+          "name": "Social Auth - Apple",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"APPLE_IDENTITY_TOKEN\",\n  \"email\": \"user@apple.com\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/jaram/social/apple", "host": ["{{BASE_URL}}"], "path": ["jaram", "social", "apple"] }
+          }
+        },
+        {
+          "name": "Social Auth - Facebook",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"FB_ACCESS_TOKEN\",\n  \"email\": \"user@fb.com\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/jaram/social/facebook", "host": ["{{BASE_URL}}"], "path": ["jaram", "social", "facebook"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer - Discovery",
+      "item": [
+        {
+          "name": "Get Vendors",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{BASE_URL}}/api/vendors", "host": ["{{BASE_URL}}"], "path": ["api", "vendors"] }
+          }
+        },
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{BASE_URL}}/api/categories", "host": ["{{BASE_URL}}"], "path": ["api", "categories"] }
+          }
+        },
+        {
+          "name": "Get Products",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{BASE_URL}}/api/products", "host": ["{{BASE_URL}}"], "path": ["api", "products"] }
+          }
+        },
+        {
+          "name": "Search Advertisements",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{BASE_URL}}/jaram/advertisements", "host": ["{{BASE_URL}}"], "path": ["jaram", "advertisements"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer - Orders & Payments",
+      "item": [
+        {
+          "name": "Place New Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{AUTH_TOKEN}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    }\n  ],\n  \"payment_method\": \"wallet\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/api/orders", "host": ["{{BASE_URL}}"], "path": ["api", "orders"] }
+          }
+        },
+        {
+          "name": "Wallet Funding",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{AUTH_TOKEN}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5000\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/api/payments/initiate", "host": ["{{BASE_URL}}"], "path": ["api", "payments", "initiate"] }
+          }
+        },
+        {
+          "name": "My Wallet Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{AUTH_TOKEN}}"}],
+            "url": { "raw": "{{BASE_URL}}/jaram/wallet", "host": ["{{BASE_URL}}"], "path": ["jaram", "wallet"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vendor - Management",
+      "item": [
+        {
+          "name": "Vendor Profile",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{AUTH_TOKEN}}"}],
+            "url": { "raw": "{{BASE_URL}}/api/vendor/profile", "host": ["{{BASE_URL}}"], "path": ["api", "vendor", "profile"] }
+          }
+        },
+        {
+          "name": "Add Product (Inventory)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{AUTH_TOKEN}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fresh Produce\",\n  \"price\": 1200,\n  \"category_id\": 2\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/api/vendor/products", "host": ["{{BASE_URL}}"], "path": ["api", "vendor", "products"] }
+          }
+        },
+        {
+          "name": "Process Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{AUTH_TOKEN}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/api/vendor/orders/1/status", "host": ["{{BASE_URL}}"], "path": ["api", "vendor", "orders", "1", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Support & Utils",
+      "item": [
+        {
+          "name": "Create Support Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{AUTH_TOKEN}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Issue with payment\",\n  \"message\": \"My wallet funding did not reflect.\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/jaram/support", "host": ["{{BASE_URL}}"], "path": ["jaram", "support"] }
+          }
+        },
+        {
+          "name": "List Banks",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{AUTH_TOKEN}}"}],
+            "url": { "raw": "{{BASE_URL}}/jaram/banks", "host": ["{{BASE_URL}}"], "path": ["jaram", "banks"] }
+          }
+        }
+      ]
+    }
+  ]
+}
