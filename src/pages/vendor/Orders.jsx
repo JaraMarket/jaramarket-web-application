@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getVendorOrders, updateOrderStatus } from '../../api/vendor';
-import { Package, Clock, CheckCircle, XCircle, Search, Loader2 } from 'lucide-react';
+import { Package, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
 const VendorOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   const fetchOrders = async () => {
     try {
@@ -22,11 +18,16 @@ const VendorOrders = () => {
     }
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchOrders();
+  }, []);
+
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
       await updateOrderStatus(orderId, newStatus);
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-    } catch (err) {
+    } catch {
       alert('Failed to update order status');
     }
   };

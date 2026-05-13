@@ -6,8 +6,8 @@ import { AuthProvider, useAuth } from './AuthContext';
 describe('AuthContext', () => {
   it('provides authentication state', () => {
     const TestComponent = () => {
-      const { isAuthenticated } = useAuth();
-      return <div data-testid="auth-status">{isAuthenticated ? 'Yes' : 'No'}</div>;
+      const { user } = useAuth();
+      return <div data-testid="auth-status">{user ? 'Yes' : 'No'}</div>;
     };
 
     const { getByTestId } = render(
@@ -16,7 +16,7 @@ describe('AuthContext', () => {
       </AuthProvider>
     );
 
-    // Default state should be unauthenticated (or whatever logic exists in the context)
+    // Default state should be unauthenticated
     expect(getByTestId('auth-status')).toHaveTextContent('No');
   });
 });

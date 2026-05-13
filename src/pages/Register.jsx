@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Lock, ArrowRight, Loader2, UserCircle, Phone, Ticket, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, UserCircle, Phone, Ticket, RefreshCw } from 'lucide-react';
 import { register as apiRegister, validateOtp, resendOtp } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../components/Notification';

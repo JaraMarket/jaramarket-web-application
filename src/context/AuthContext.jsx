@@ -8,19 +8,17 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = async () => {
     const token = localStorage.getItem('jara_token');
     if (token) {
       try {
         const response = await getProfile();
-        // Backend returns { status, message, data: { ...user_fields } }
-        const userData = response.data.data || response.data;
+        // Backend usually returns { status, message, data: { ...user_fields } }
+        // api/auth.js returns response.data
+        const userData = response.data || response.user || response;
         setUser(userData);
       } catch (err) {
+        console.error('Auth check failed:', err);
         localStorage.removeItem('jara_token');
         localStorage.removeItem('user');
         setUser(null);
@@ -29,18 +27,25 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    checkAuth();
+  }, []);
+
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
     try {
       const response = await apiLogin(credentials);
-      // 'response' is already the JSON { status, message, data } from auth.js
-      const { token, ...userData } = response.data;
-      
+      // api/auth.js returns response.data
+      const authData = response.data || response;
+      const { token, ...userData } = authData;
+      const finalUser = userData.user || userData;
+
       localStorage.setItem('jara_token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
-      return userData;
+      localStorage.setItem('user', JSON.stringify(finalUser));
+      setUser(finalUser);
+      return finalUser;
     } catch (err) {
       console.error('Login error:', err);
       if (err.response) {
@@ -65,13 +70,15 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await socialLoginGoogle(googleData);
-      // 'response' is already the JSON { status, message, data } from auth.js
-      const { token, ...userData } = response.data;
-      
+      // api/auth.js returns response.data
+      const authData = response.data || response;
+      const { token, ...userData } = authData;
+      const finalUser = userData.user || userData;
+
       localStorage.setItem('jara_token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
-      return userData;
+      localStorage.setItem('user', JSON.stringify(finalUser));
+      setUser(finalUser);
+      return finalUser;
     } catch (err) {
       console.error('Social login error in Context:', err);
       if (err.response) {
@@ -106,4 +113,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

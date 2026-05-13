@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getVendorEarnings, getVendorOrders } from '../../api/vendor';
 import { TrendingUp, Package, DollarSign, Clock, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import SEO from '../../components/SEO';
@@ -10,7 +10,6 @@ const VendorDashboard = () => {
     pendingOrders: 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,8 +26,6 @@ const VendorDashboard = () => {
         setRecentOrders(ordersData.data?.slice(0, 5) || []);
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
-      } finally {
-        setLoading(false);
       }
     };
     fetchData();

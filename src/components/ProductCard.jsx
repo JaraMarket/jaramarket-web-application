@@ -1,4 +1,3 @@
-import React from 'react';
 import { ShoppingCart, Star, Heart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNotification } from '../components/Notification';

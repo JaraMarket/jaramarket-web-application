@@ -21,10 +21,6 @@ const VendorProducts = () => {
     stock: 10
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     try {
       const [prodRes, catRes] = await Promise.all([
@@ -39,6 +35,10 @@ const VendorProducts = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {

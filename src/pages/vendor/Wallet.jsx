@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getVendorEarnings, getVendorPayouts, requestPayout } from '../../api/vendor';
 import { getBanks } from '../../api/orders';
 import { Wallet, ArrowUpCircle, History, Landmark, Loader2, Info, ChevronDown } from 'lucide-react';
@@ -14,11 +14,7 @@ const VendorWallet = () => {
   const [requesting, setRequesting] = useState(false);
   const { addNotification } = useNotification();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchWalletData = async () => {
     try {
       const [earningsData, payoutsData, banksData] = await Promise.all([
         getVendorEarnings(),
@@ -38,6 +34,10 @@ const VendorWallet = () => {
     }
   };
 
+  useEffect(() => {
+    fetchWalletData();
+  }, []);
+
   const handlePayoutRequest = async (e) => {
     e.preventDefault();
     if (parseFloat(amount) > balance) {
@@ -53,7 +53,7 @@ const VendorWallet = () => {
       });
       addNotification('Payout request submitted successfully', 'success');
       setAmount('');
-      fetchData();
+      fetchWalletData();
     } catch (err) {
       addNotification('Failed to submit payout request', 'error');
     } finally {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -84,6 +83,7 @@ const Navbar = () => {
                 Get Started
               </Link>
             )}
+
           </div>
         </div>
       </div>

@@ -36,9 +36,7 @@ axiosInstance.interceptors.response.use(
       if (error.response.status === 401) {
         localStorage.removeItem('jara_token');
         localStorage.removeItem('user');
-        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
-          window.location.href = '/login';
-        }
+        // Removed hard redirect to /login to allow guest access on public pages
       }
     } else if (error.request) {
       console.error('API No Response:', error.request);

@@ -1,4 +1,3 @@
-import React from 'react';
 import { MapPin, Star, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
