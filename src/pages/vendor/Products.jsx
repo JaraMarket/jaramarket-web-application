@@ -1,22 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { getVendorProducts, deleteProduct } from '../../api/vendor';
-import { Plus, Search, Edit2, Trash2, Loader2, MoreVertical } from 'lucide-react';
+import { getVendorProducts, deleteProduct, createProduct } from '../../api/vendor';
+import { getCategories } from '../../api/vendors';
+import { Plus, Search, Edit2, Trash2, Loader2, X, Upload, Tag } from 'lucide-react';
+import { useNotification } from '../../components/Notification';
 
 const VendorProducts = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addNotification } = useNotification();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    price: '',
+    category_id: '',
+    description: '',
+    stock: 10
+  });
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
-      const response = await getVendorProducts();
-      setProducts(response.data || []);
+      const [prodRes, catRes] = await Promise.all([
+        getVendorProducts(),
+        getCategories()
+      ]);
+      setProducts(prodRes.data || []);
+      setCategories(catRes.data || []);
     } catch (err) {
-      console.error('Error fetching products:', err);
+      console.error('Error fetching data:', err);
     } finally {
       setLoading(false);
     }
@@ -27,9 +45,26 @@ const VendorProducts = () => {
       try {
         await deleteProduct(id);
         setProducts(products.filter(p => p.id !== id));
+        addNotification('Product deleted successfully', 'success');
       } catch (err) {
-        alert('Failed to delete product');
+        addNotification('Failed to delete product', 'error');
       }
+    }
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await createProduct(formData);
+      addNotification('Product added successfully!', 'success');
+      setShowAddModal(false);
+      setFormData({ name: '', price: '', category_id: '', description: '', stock: 10 });
+      fetchData();
+    } catch (err) {
+      addNotification('Failed to add product. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -44,7 +79,7 @@ const VendorProducts = () => {
           <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>Product Catalog</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage your inventory and store listings.</p>
         </div>
-        <button className="btn-primary" style={{ padding: '12px 24px' }}>
+        <button className="btn-primary" onClick={() => setShowAddModal(true)} style={{ padding: '12px 24px' }}>
           <Plus size={20} /> Add New Product
         </button>
       </div>
@@ -83,7 +118,6 @@ const VendorProducts = () => {
                   <th style={{ padding: '16px 24px' }}>Product</th>
                   <th style={{ padding: '16px 24px' }}>Category</th>
                   <th style={{ padding: '16px 24px' }}>Price</th>
-                  <th style={{ padding: '16px 24px' }}>Stock</th>
                   <th style={{ padding: '16px 24px', textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
@@ -94,7 +128,7 @@ const VendorProducts = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
                           <img 
-                            src={product.image || 'https://via.placeholder.com/48'} 
+                            src={product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=100&q=80'} 
                             alt={product.name} 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
@@ -103,22 +137,10 @@ const VendorProducts = () => {
                       </div>
                     </td>
                     <td style={{ padding: '16px 24px', color: 'var(--text-secondary)' }}>
-                      {product.category || 'General'}
+                      {categories.find(c => c.id === product.category_id)?.name || 'General'}
                     </td>
                     <td style={{ padding: '16px 24px', fontWeight: '700' }}>
                       ₦{product.price?.toLocaleString()}
-                    </td>
-                    <td style={{ padding: '16px 24px' }}>
-                      <span style={{ 
-                        padding: '4px 8px', 
-                        borderRadius: '6px', 
-                        fontSize: '12px', 
-                        fontWeight: '600',
-                        background: 'rgba(16, 185, 129, 0.1)',
-                        color: '#10b981'
-                      }}>
-                        In Stock
-                      </span>
                     </td>
                     <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -137,7 +159,7 @@ const VendorProducts = () => {
                 ))}
                 {filteredProducts.length === 0 && (
                   <tr>
-                    <td colSpan="5" style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <td colSpan="4" style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-secondary)' }}>
                       No products found.
                     </td>
                   </tr>
@@ -147,6 +169,134 @@ const VendorProducts = () => {
           </div>
         )}
       </div>
+
+      {/* Add Product Modal */}
+      {showAddModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          backdropFilter: 'blur(5px)',
+          padding: '20px'
+        }}>
+          <div className="card glass animate-fade" style={{ width: '100%', maxWidth: '600px', padding: '40px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '24px' }}>Add New Product</h2>
+              <button onClick={() => setShowAddModal(false)} style={{ background: 'none', color: 'var(--text-secondary)' }}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', gap: '20px' }}>
+                <div style={{ flex: 2 }}>
+                  <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Product Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="Fresh Tomatoes"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--card-border)',
+                      background: 'var(--bg-secondary)',
+                      color: 'var(--text-primary)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Price (₦)</label>
+                  <input 
+                    type="number" 
+                    placeholder="1500"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--card-border)',
+                      background: 'var(--bg-secondary)',
+                      color: 'var(--text-primary)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Category</label>
+                <select 
+                  value={formData.category_id}
+                  onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    border: '1px solid var(--card-border)',
+                    background: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    outline: 'none'
+                  }}
+                >
+                  <option value="">Select a category</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Description</label>
+                <textarea 
+                  placeholder="Tell customers more about your product..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={4}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    border: '1px solid var(--card-border)',
+                    background: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    outline: 'none',
+                    resize: 'none'
+                  }}
+                />
+              </div>
+
+              <div style={{ border: '2px dashed var(--card-border)', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
+                <Upload size={32} style={{ color: 'var(--text-secondary)', marginBottom: '12px' }} />
+                <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Upload Product Image</p>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.6 }}>PNG, JPG or WEBP (Max 2MB)</p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                <button type="button" className="glass" onClick={() => setShowAddModal(false)} style={{ flex: 1 }}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary" disabled={isSubmitting} style={{ flex: 2, justifyContent: 'center' }}>
+                  {isSubmitting ? <Loader2 className="animate-spin" /> : 'Create Product'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

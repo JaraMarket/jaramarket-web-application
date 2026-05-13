@@ -85,7 +85,11 @@ const Cart = () => {
             </div>
           </div>
 
-          <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '16px' }}>
+          <button 
+            onClick={() => navigate('/checkout')}
+            className="btn-primary" 
+            style={{ width: '100%', justifyContent: 'center', padding: '16px' }}
+          >
             Proceed to Checkout <CreditCard size={20} />
           </button>
           

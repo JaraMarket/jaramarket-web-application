@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Connection Test</title>
+</head>
+<body>
+    <h1>Testing Connection to Backend...</h1>
+    <div id="status">Starting test...</div>
+    <pre id="output"></pre>
+
+    <script>
+        const API_URL = 'https://jara-market-laravel-backend-production.up.railway.app/api/jaram/register';
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+
+        async function test() {
+            try {
+                status.innerText = 'Sending request to ' + API_URL;
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@gmail.com'
+                    })
+                });
+                
+                status.innerText = 'Response received!';
+                const data = await response.json();
+                output.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                status.innerText = 'Error occurred!';
+                output.innerText = 'Error: ' + err.message + '\n\n' + 
+                                  'This often happens due to CORS if the backend doesn\'t allow this origin, ' +
+                                  'or if the server is unreachable from your network.';
+            }
+        }
+
+        test();
+    </script>
+</body>
+</html>

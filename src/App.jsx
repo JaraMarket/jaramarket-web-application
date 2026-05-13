@@ -11,6 +11,9 @@ import PageTransition from './components/PageTransition';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Wallet from './pages/Wallet';
+import Support from './pages/Support';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VendorDashboard from './pages/vendor/Dashboard';
@@ -33,6 +36,9 @@ function AppContent() {
             <Route path="/" element={<PageTransition><Home /></PageTransition>} />
             <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
             <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+            <Route path="/checkout" element={<PrivateRoute><PageTransition><Checkout /></PageTransition></PrivateRoute>} />
+            <Route path="/wallet" element={<PrivateRoute><PageTransition><Wallet /></PageTransition></PrivateRoute>} />
+            <Route path="/support" element={<PageTransition><Support /></PageTransition>} />
             <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
             <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
             <Route 
