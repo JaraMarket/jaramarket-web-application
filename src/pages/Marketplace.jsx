@@ -72,7 +72,7 @@ const Marketplace = () => {
   }, [products, activeCat, searchQuery]);
 
   return (
-    <div className="animate-fade" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+    <div className="animate-fade section-padding" style={{ paddingTop: '120px' }}>
       <SEO 
         title="Marketplace" 
         description="Browse quality food products and verified vendors in our premium marketplace." 

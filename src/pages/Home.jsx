@@ -37,8 +37,8 @@ const Home = () => {
       />
 
       {/* ── Hero ── */}
-      <section style={{
-        padding: '160px 0 100px',
+      <section className="section-padding" style={{
+        paddingTop: '160px',
         background: 'radial-gradient(circle at top right, var(--primary-glow), transparent 40%)',
         textAlign: 'center'
       }}>
@@ -222,9 +222,9 @@ const Home = () => {
       </section>
 
       {/* ── Why JaraMarket ── */}
-      <section style={{ padding: '100px 0' }}>
+      <section className="section-padding">
         <div className="container">
-          <div style={{
+          <div className="responsive-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
             gap: '80px',
