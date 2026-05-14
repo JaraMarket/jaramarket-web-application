@@ -20,7 +20,7 @@ const Register = () => {
     referral_code: '',
     role: 'customer'
   });
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(['', '', '', '']);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -62,7 +62,7 @@ const Register = () => {
     setOtp(newOtp);
 
     // Focus next input
-    if (element.value !== '' && index < 5) {
+    if (element.value !== '' && index < 3) {
       otpInputs.current[index + 1].focus();
     }
   };
@@ -113,8 +113,8 @@ const Register = () => {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const otpValue = otp.join('');
-    if (otpValue.length < 6) {
-      setError('Please enter the full 6-digit code.');
+    if (otpValue.length < 4) {
+      setError('Please enter the full 4-digit code.');
       return;
     }
 
@@ -122,14 +122,47 @@ const Register = () => {
     setError(null);
     setSuccess(null);
     try {
-      await validateOtp({ email: formData.email, otp: otpValue });
+      const response = await validateOtp({ email: formData.email, otp: otpValue });
+      
+      // Since backend now returns the user and token in 'data'
+      const authData = response.data || response;
+      const { token, ...userData } = authData;
+      const finalUser = userData.user || userData;
+
+      // Save to localStorage for immediate session activation
+      localStorage.setItem('jara_token', token);
+      localStorage.setItem('user', JSON.stringify(finalUser));
+      
+      // Update AuthContext state
+      await checkAuth();
+
       setSuccess('Email verified successfully! Welcome to JaraMarket.');
-      setTimeout(() => navigate('/login'), 2000);
+      
+      // Professional redirect based on role
+      setTimeout(() => {
+        if (finalUser.role === 'vendor') {
+          navigate('/vendor/dashboard');
+        } else {
+          navigate('/');
+        }
+      }, 1500);
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid verification code. Please try again.');
+      // Clear OTP on error for retry
+      setOtp(['', '', '', '']);
+      if (otpInputs.current[0]) otpInputs.current[0].focus();
     } finally {
       setIsVerifying(false);
     }
+  };
+
+  const handlePaste = (e) => {
+    const data = e.clipboardData.getData('text').slice(0, 4).split('');
+    if (data.length === 4 && data.every(char => !isNaN(char))) {
+      setOtp(data);
+      otpInputs.current[3].focus();
+    }
+    e.preventDefault();
   };
 
   const handleResendOtp = async () => {
@@ -143,7 +176,7 @@ const Register = () => {
       setSuccess('A fresh verification code has been sent.');
       setResendTimer(60);
       setCanResend(false);
-      setOtp(['', '', '', '', '', '']);
+      setOtp(['', '', '', '']);
       otpInputs.current[0].focus();
     } catch (err) {
       if (err.response?.data?.message === 'All transports failed.') {
@@ -212,12 +245,15 @@ const Register = () => {
           <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontSize: '15px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                We've sent a 6-digit verification code to <br />
+                We've sent a 4-digit verification code to <br />
                 <span style={{ color: 'var(--text-primary)', fontWeight: '700' }}>{formData.email}</span>
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <div 
+              style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '8px' }}
+              onPaste={handlePaste}
+            >
               {otp.map((data, index) => (
                 <input
                   key={index}
@@ -228,17 +264,18 @@ const Register = () => {
                   onChange={(e) => handleOtpChange(e.target, index)}
                   onKeyDown={(e) => handleOtpKeyDown(e, index)}
                   style={{
-                    width: '45px',
-                    height: '55px',
+                    width: '48px',
+                    height: '58px',
                     borderRadius: '12px',
                     border: `2px solid ${otp[index] ? 'var(--primary)' : 'var(--card-border)'}`,
-                    background: 'var(--bg-secondary)',
+                    background: otp[index] ? 'var(--primary-glow)' : 'var(--bg-secondary)',
                     textAlign: 'center',
-                    fontSize: '20px',
-                    fontWeight: '700',
+                    fontSize: '24px',
+                    fontWeight: '800',
                     color: 'var(--text-primary)',
                     outline: 'none',
-                    transition: 'var(--transition)'
+                    boxShadow: otp[index] ? '0 0 15px var(--primary-glow)' : 'none',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 />
               ))}
